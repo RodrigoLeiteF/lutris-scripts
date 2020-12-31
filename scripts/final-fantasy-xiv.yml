@@ -1,0 +1,93 @@
+name: Final Fantasy XIV: A Realm Reborn
+game_slug: final-fantasy-xiv-online
+version: 1
+slug: ffxiv-xivlauncher
+runner: wine
+script:
+  files:
+  - xivlauncher: https://github.com/goatcorp/FFXIVQuickLauncher/releases/download/5.0.3/XIVLauncher-5.0.3-full.nupkg
+  - updater: https://gist.githubusercontent.com/cking/8be0bf9a030940df3de7eeeab582180e/raw/e1b652d465398c14d62c9f0ba242ba39f30aafa9/manual.sh
+  - steam_integration: https://github.com/RodrigoLeiteF/linux-ffxiv-steam/releases/download/v0.1-1/release.tar.gz
+  game:
+    arch: win64
+    custom-name: Final Fantasy XIV - A Realm Reborn (XIVLauncher)
+    exe: drive_c/XIVLauncher/XIVLauncher.exe
+    prefix: $GAMEDIR
+  installer:
+  - task:
+      app: dotnet48
+      name: winetricks
+      prefix: $GAMEDIR
+  - extract:
+      dst: $CACHE/xivlauncher
+      file: xivlauncher
+      format: zip
+  - move:
+      dst: $GAMEDIR/drive_c/XIVLauncher
+      src: $CACHE/xivlauncher/lib/net45
+  - move:
+      dst: $GAMEDIR/update.sh
+      src: $CACHE/updater/manual.sh
+  - chmodx: $GAMEDIR/drive_c/XIVLauncher/XIVLauncher.exe
+  - chmodx: $GAMEDIR/update.sh
+  - extract:
+      dst: $CACHE/steam_integration
+      file: steam_integration
+  - move:
+      dst: $GAMEDIR/steam_integration
+      src: $CACHE/steam_integration
+  - task:
+      arch: win64
+      description: Adding Registry Entries for FFXIV Launcher
+      key: HideWineExports
+      name: set_regedit
+      path: HKEY_CURRENT_USER\Software\Wine
+      prefix: $GAMEDIR
+      type: REG_SZ
+      value: Y
+  - task:
+      arch: win64
+      description: Disabling Hardware Acceleration. This is necessary for WPF applications
+        to run
+      key: DisableHWAcceleration
+      name: set_regedit
+      path: HKEY_CURRENT_USER\Software\Microsoft\Avalon.Graphics
+      prefix: $GAMEDIR
+      type: REG_DWORD
+      value: '00000001'
+  - execute:
+      command: mkdir -p "$GAMEDIR"/drive_c/users/$USER/My\ Documents/My\ Games/FINAL\
+        FANTASY\ XIV\ -\ A\ Realm\ Reborn
+  - execute:
+      command: echo -e "<FINAL FANTASY XIV Config File>\n\n<Cutscene Settings>\nCutsceneMovieOpening
+        1" > "$GAMEDIR"/drive_c/users/$USER/My\ Documents/My\ Games/FINAL\ FANTASY\
+        XIV\ -\ A\ Realm\ Reborn/FFXIV.cfg
+  - execute:
+      command: echo -e "<FINAL FANTASY XIV Boot Config File>\n\n<Version>\nBrowser 1"
+        > "$GAMEDIR"/drive_c/users/$USER/My\ Documents/My\ Games/FINAL\ FANTASY\ XIV\
+        -\ A\ Realm\ Reborn/FFXIV_BOOT.cfg
+  - execute:
+      command: mkdir -p "$GAMEDIR"/drive_c/Program\ Files\ \(x86\)/SquareEnix/FINAL\
+        FANTASY\ XIV\ -\ A\ Realm\ Reborn
+  - write_file:
+      content: '#!/usr/bin/env bash
+
+
+        cd "$(dirname "${BASH_SOURCE[0]}")"
+
+
+        ./update.sh -s
+
+        nohup /usr/bin/env python ./steam_integration/steam-idle.py &
+
+        '
+      file: $GAMEDIR/update_and_run_steam.sh
+  - chmodx: $GAMEDIR/update_and_run_steam.sh
+  system:
+    env:
+      XL_WINEONLINUX: true
+      __GL_SHADER_DISK_CACHE: 1
+      __GL_SHADER_DISK_CACHE_PATH: $GAMEDIR
+    prelaunch_command: $GAMEDIR/update_and_run_steam.sh
+    prelaunch_wait: false
+    pulse_latency: true
