@@ -3,6 +3,7 @@ game_slug: final-fantasy-xiv-online
 version: 1
 slug: ffxiv-xivlauncher
 runner: wine
+require-binaries: curl, wrestool, zenity, getopts
 script:
   files:
   - xivlauncher: https://github.com/goatcorp/FFXIVQuickLauncher/releases/download/5.0.3/XIVLauncher-5.0.3-full.nupkg
