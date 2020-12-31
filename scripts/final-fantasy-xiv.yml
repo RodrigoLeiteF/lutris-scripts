@@ -94,4 +94,4 @@ script:
     pulse_latency: true
   wine:
     esync: true
-    version: lutris-5.7-11-x86_64
+    version: lutris-5.7-10-x86_64
