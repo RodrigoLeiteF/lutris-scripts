@@ -1,6 +1,6 @@
 name: Final Fantasy XIV - A Realm Reborn
 game_slug: final-fantasy-xiv-online
-version: 1
+version: XIVLauncher
 slug: ffxiv-xivlauncher
 runner: wine
 require-binaries: curl, wrestool, zenity, getopts
