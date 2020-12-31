@@ -92,3 +92,6 @@ script:
     prelaunch_command: $GAMEDIR/update_and_run_steam.sh
     prelaunch_wait: false
     pulse_latency: true
+  wine:
+    esync: true
+    version: lutris-5.7-11-x86_64
